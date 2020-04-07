@@ -1,2 +1,2 @@
-# test
-1
+# R playground
+learning R syntax
