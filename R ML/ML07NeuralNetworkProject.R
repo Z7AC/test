@@ -1,0 +1,40 @@
+library(ggplot2)
+library(MASS)
+library(caTools)
+
+data <- read.csv('data/bank_note_data.csv')
+head(data)
+str(data)
+
+set.seed(101)
+sample <- sample.split(data[,1], 0.7)
+train <- subset(data, sample==T)
+test <- subset(data, sample==F)
+str(train)
+
+library(neuralnet)
+n <- names(train)
+f <- as.formula(paste('Class ~',paste(n[!n %in% 'Class'], collapse = '+')))
+nn <- neuralnet(formula = f, data = train,hidden = c(10,5),linear.output=F)
+pred <- compute(x = nn, test[,1:4])
+head(pred$net.result)
+
+roundpred <- round(pred$net.result)
+head(roundpred)
+table <- table(roundpred,test[,5])
+print(table)
+plot(nn)
+
+# compare with random forest method
+library(randomForest)
+data$Class <- factor(data$Class)
+set.seed(101)
+sample <- sample.split(data[,1], 0.7)
+train <- subset(data, sample==T)
+test <- subset(data, sample==F)
+str(train)
+
+rf <- randomForest(f, data=train)
+predrf <- predict(rf, test[,1:4])
+tablerf <- table(predrf,test[,5])
+print(tablerf)
